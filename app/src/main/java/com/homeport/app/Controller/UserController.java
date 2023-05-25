@@ -2,6 +2,8 @@ package com.homeport.app.Controller;
 
 import com.homeport.app.Entity.User;
 import com.homeport.app.Dao.UserRep;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -26,7 +28,7 @@ public class UserController {
      * @return
      **/
     @ResponseBody
-    @RequestMapping(value = "/getall",method = {RequestMethod.GET,RequestMethod.POST})
+    @RequestMapping(value = "/getall",method = {RequestMethod.GET})
     public List<User> getUserList(){
         return userRep.findAll();
     }
@@ -37,7 +39,7 @@ public class UserController {
      * @return
      */
     @ResponseBody
-    @RequestMapping(value = "/getinfo/{user_id}",method = {RequestMethod.GET,RequestMethod.POST})
+    @RequestMapping(value = "/getinfo/{user_id}",method = {RequestMethod.GET})
     public User getUserInfo (@PathVariable("user_id") String user_id){
         return userRep.getInfo(user_id);
 //        return userRep.getInfo(user_id) != null;
@@ -89,13 +91,10 @@ public class UserController {
 
     /**修改个人密码
      *
-     * @param user_id
-     * @param newPassword
-     * @return
      */
     @ResponseBody
-    @RequestMapping(value = "/updatePassword/{userid}/{newPassword}",method = {RequestMethod.GET,RequestMethod.POST})
-    public String updatePassword(@PathVariable("userid") String user_id,
+    @RequestMapping(value = "/updatePassword/{user_id}/{newPassword}",method = {RequestMethod.POST})
+    public String updatePassword(@PathVariable("user_id") String user_id,
                                   @PathVariable("newPassword") String newPassword) throws Exception{
         String psw;
         psw = getShaPassword(newPassword);
@@ -113,13 +112,10 @@ public class UserController {
 
     /**登录校验
      *
-     * @param user_id
-     * @param password
-     * @return
      */
     @ResponseBody
-    @RequestMapping(value = "/logCheck/{userid}/{password}",method = {RequestMethod.GET,RequestMethod.POST})
-    public String logCheck(@PathVariable("userid") String user_id, @PathVariable("password") String password) {
+    @RequestMapping(value = "/logCheck/{user_id}/{password}",method = {RequestMethod.POST})
+    public String logCheck(@PathVariable("user_id") String user_id, @PathVariable("password") String password) {
 
         boolean flag = false;
         User user= new User();
@@ -142,5 +138,24 @@ public class UserController {
         } else {
             return "error";
         }
+    }
+
+    /**充值
+     *
+     * @param user_id
+     * @param amount
+     * @return
+     */
+    @ResponseBody
+    @RequestMapping(value = "/charge",method = {RequestMethod.POST})
+    public Boolean charge(@RequestParam("user_id") String user_id, @RequestParam("amount") Double amount, HttpServletRequest request, HttpServletResponse response) {
+        try {
+            request.setAttribute("user_id", user_id);
+            request.setAttribute("amount", amount);
+            request.getRequestDispatcher("/bounty/charge").forward(request,response);
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
     }
 }

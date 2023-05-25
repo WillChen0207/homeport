@@ -9,10 +9,10 @@ import jakarta.persistence.Id;
 @Component
 public class User {
     @Id
-    public String userId;
-    public Integer userType;
-    public String password;
-    public String username;
+    private String userId;
+    private Integer userType;
+    private String password;
+    private String username;
 
     public String getUserId() {
         return userId;
