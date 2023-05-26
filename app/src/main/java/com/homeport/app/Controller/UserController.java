@@ -1,7 +1,9 @@
 package com.homeport.app.Controller;
 
-import com.homeport.app.Entity.User;
+import com.homeport.app.Dao.MessageRep;
 import com.homeport.app.Dao.UserRep;
+import com.homeport.app.Entity.Message;
+import com.homeport.app.Entity.User;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.SneakyThrows;
@@ -23,6 +25,9 @@ public class UserController {
     @Autowired
     public UserRep userRep;
 
+    @Autowired
+    public MessageRep messageRep;
+
     /**
      *查询所有用户
      * @return
@@ -40,7 +45,7 @@ public class UserController {
      */
     @ResponseBody
     @RequestMapping(value = "/getinfo/{user_id}",method = {RequestMethod.GET})
-    public User getUserInfo (@PathVariable("user_id") String user_id){
+    public User getUserInfo(@PathVariable("user_id") String user_id){
         return userRep.getInfo(user_id);
 //        return userRep.getInfo(user_id) != null;
     }
@@ -157,5 +162,43 @@ public class UserController {
             return false;
         }
         return true;
+    }
+
+    /**发消息（目前仅文字）
+     *
+     * @param receiver_id
+     * @param sender_id
+     * @param message_type
+     * @param message_content
+     * @return
+     */
+    @ResponseBody
+    @RequestMapping(value = "/send",method = {RequestMethod.POST})
+    public Boolean send(@RequestParam("sender_id") String sender_id,
+                        @RequestParam("receiver_id") String receiver_id,
+                        @RequestParam("message_type") Integer message_type,
+                        @RequestParam("message_content") String message_content,
+                        HttpServletRequest request,
+                        HttpServletResponse response) {
+        try {
+            request.setAttribute("sender_id", sender_id);
+            request.setAttribute("receiver_id", receiver_id);
+            request.setAttribute("message_type", message_type);
+            request.setAttribute("message_content", message_content);
+            request.getRequestDispatcher("/message/send").forward(request,response);
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
+    /**查询自身消息
+     *
+     * @param user_id
+     */
+    @ResponseBody
+    @RequestMapping(value = "/loadallmessage",method = {RequestMethod.GET})
+    public List<Message> loadMessage(@RequestParam("user_id") String user_id) {
+            return messageRep.loadAll(user_id);
     }
 }
